@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>EvDehaze: Event-Guided Dehazing</title>
+    <meta name="author" content="anonymous">
+    <meta name="description" content="Project page of EvDehaze">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="icon" type="image/png" href="">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.8.0/codemirror.min.css">
+    <link rel="stylesheet" href="../format/app.css">
+    <link rel="stylesheet" href="../format/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.8.0/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.5.3/clipboard.min.js"></script>
+    <script src="../format/app.js"></script>
+  </head>
+
+  <body style="text-align: center;">
+    <div class="container" id="main">
+      <div class="row">
+        <h1 class="col-md-12 text-center">
+          EvDehaze: Event-Guided Image Dehazing under Adverse Weather Conditions
+        </h1>
+      </div>
+
+      <div class="row">
+        <div class="col-md-8 col-md-offset-2 text-center">
+          <ul class="nav nav-pills nav-justified">
+            <li>
+              <a href="#">
+                <img src="./images/dataset.png" height="100px"><br>
+                <h4><strong>Dataset</strong></h4>
+              </a>
+            </li>
+            <li>
+              <a href="#">
+                <img src="./images/github_icon.jpg" height="100px"><br>
+                <h4><strong>Code</strong></h4>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-8 col-md-offset-2">
+          <h3>Abstract</h3>
+          <p class="text-justify">
+            EvDehaze is a novel event-guided image restoration framework designed to address challenging dehazing problems under dynamic, adverse weather conditions such as rain, fog, and low-light. Leveraging the high temporal resolution and motion sensitivity of event cameras, EvDehaze introduces a dual-branch architecture that injects event-aware priors via cross-modal attention mechanisms to refine visibility and scene fidelity. We demonstrate superior performance of EvDehaze across various weather types on real-world and synthetic benchmarks.
+          </p>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-8 col-md-offset-2">
+          <h3>System Overview</h3>
+          <img src="./images/overview_evdehaze.png" class="img-responsive" alt="overview" class="center">
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-8 col-md-offset-2">
+          <h3>Architecture Details</h3>
+          <p class="text-justify">
+            The network consists of an event encoder that processes temporal event stacks into feature maps, which are then fused with RGB image features in a UNet backbone via cross-attention layers. This facilitates effective alignment of structural and motion cues from events with color textures in hazy scenes.
+          </p>
+          <img src="./images/architecture_evdehaze.png" class="img-responsive" alt="architecture">
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-8 col-md-offset-2">
+          <h3>Experimental Results</h3>
+          <p class="text-justify">
+            EvDehaze achieves state-of-the-art results in both quantitative metrics (PSNR, SSIM) and visual quality across multiple test conditions. Below we show sample comparisons under dense haze and heavy rain scenarios.
+          </p>
+          <img src="./images/results_evdehaze.png" class="img-responsive" alt="results">
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-8 col-md-offset-2">
+          <h3>Applications</h3>
+          <p class="text-justify">
+            EvDehaze is applicable to real-time perception in autonomous driving, robotics, and surveillance, especially in scenarios with compromised visibility. The fusion of event-based sensors with conventional RGB imaging opens a new direction in robust vision systems.
+          </p>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
