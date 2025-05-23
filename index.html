@@ -10,14 +10,10 @@
     <link rel="icon" type="image/png" href="">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.8.0/codemirror.min.css">
     <link rel="stylesheet" href="../format/app.css">
     <link rel="stylesheet" href="../format/bootstrap.min.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.8.0/codemirror.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.5.3/clipboard.min.js"></script>
-    <script src="../format/app.js"></script>
   </head>
 
   <body style="text-align: center;">
@@ -33,13 +29,13 @@
           <ul class="nav nav-pills nav-justified">
             <li>
               <a href="#">
-                <img src="./images/dataset.png" height="100px"><br>
+                <img src="./images/1-RealDataset.pdf" height="100px"><br>
                 <h4><strong>Dataset</strong></h4>
               </a>
             </li>
             <li>
               <a href="#">
-                <img src="./images/github_icon.jpg" height="100px"><br>
+                <img src="./images/3-Methods.pdf" height="100px"><br>
                 <h4><strong>Code</strong></h4>
               </a>
             </li>
@@ -59,36 +55,42 @@
       <div class="row">
         <div class="col-md-8 col-md-offset-2">
           <h3>System Overview</h3>
-          <img src="./images/overview_evdehaze.png" class="img-responsive" alt="overview" class="center">
+          <img src="./images/0-CoverFigure.pdf" class="img-responsive" alt="overview">
         </div>
       </div>
 
       <div class="row">
         <div class="col-md-8 col-md-offset-2">
           <h3>Architecture Details</h3>
-          <p class="text-justify">
-            The network consists of an event encoder that processes temporal event stacks into feature maps, which are then fused with RGB image features in a UNet backbone via cross-attention layers. This facilitates effective alignment of structural and motion cues from events with color textures in hazy scenes.
-          </p>
-          <img src="./images/architecture_evdehaze.png" class="img-responsive" alt="architecture">
+          <img src="./images/3-Methods.pdf" class="img-responsive" alt="architecture">
         </div>
       </div>
 
       <div class="row">
         <div class="col-md-8 col-md-offset-2">
-          <h3>Experimental Results</h3>
-          <p class="text-justify">
-            EvDehaze achieves state-of-the-art results in both quantitative metrics (PSNR, SSIM) and visual quality across multiple test conditions. Below we show sample comparisons under dense haze and heavy rain scenarios.
-          </p>
-          <img src="./images/results_evdehaze.png" class="img-responsive" alt="results">
+          <h3>Results</h3>
+          <p class="text-justify">Below are visual results comparing EvDehaze with other baselines:</p>
+          <img src="./images/8-Compare.pdf" class="img-responsive" alt="results">
+          <img src="./images/visual_compare.pdf" class="img-responsive" alt="visual comparison">
+          <img src="./images/sots_test1.pdf" class="img-responsive" alt="sots test 1">
+          <img src="./images/sots_test2.pdf" class="img-responsive" alt="sots test 2">
         </div>
       </div>
 
       <div class="row">
         <div class="col-md-8 col-md-offset-2">
-          <h3>Applications</h3>
-          <p class="text-justify">
-            EvDehaze is applicable to real-time perception in autonomous driving, robotics, and surveillance, especially in scenarios with compromised visibility. The fusion of event-based sensors with conventional RGB imaging opens a new direction in robust vision systems.
-          </p>
+          <h3>Event Feature Visualization</h3>
+          <img src="./images/event_feature.pdf" class="img-responsive" alt="event features">
+          <img src="./images/event_visual.pdf" class="img-responsive" alt="event visualization">
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-8 col-md-offset-2">
+          <h3>Real-world Evaluation</h3>
+          <img src="./images/11-Realworld-Evaluation.pdf" class="img-responsive" alt="real world eval">
+          <img src="./images/real_event.pdf" class="img-responsive" alt="real event">
+          <img src="./images/reside_event.pdf" class="img-responsive" alt="reside event">
         </div>
       </div>
     </div>
