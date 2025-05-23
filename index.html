@@ -20,7 +20,7 @@
     <div class="container" id="main">
       <div class="row">
         <h1 class="col-md-12 text-center">
-          EvDehaze: Event-Guided Image Dehazing under Adverse Weather Conditions
+          EvDehaze: Dynamic Scene Dehazing via Event Camera
         </h1>
       </div>
 
@@ -29,13 +29,13 @@
           <ul class="nav nav-pills nav-justified">
             <li>
               <a href="#">
-                <img src="./image/1-RealDataset.pdf" height="100px"><br>
+                <img src="./images/1-RealDataset.png" height="100px"><br>
                 <h4><strong>Dataset</strong></h4>
               </a>
             </li>
             <li>
               <a href="#">
-                <img src="./image/3-Methods.pdf" height="100px"><br>
+                <img src="./images/3-Methods.png" height="100px"><br>
                 <h4><strong>Code</strong></h4>
               </a>
             </li>
@@ -47,50 +47,46 @@
         <div class="col-md-8 col-md-offset-2">
           <h3>Abstract</h3>
           <p class="text-justify">
-            EvDehaze is a novel event-guided image restoration framework designed to address challenging dehazing problems under dynamic, adverse weather conditions such as rain, fog, and low-light. Leveraging the high temporal resolution and motion sensitivity of event cameras, EvDehaze introduces a dual-branch architecture that injects event-aware priors via cross-modal attention mechanisms to refine visibility and scene fidelity. We demonstrate superior performance of EvDehaze across various weather types on real-world and synthetic benchmarks.
+            Clear imaging under hazy conditions is a critical task. To address the limitations of traditional dehazing models based solely on RGB sensors, we propose <strong>EvDehaze</strong>, the first event-guided diffusion framework for image dehazing. Leveraging the high dynamic range and temporal precision of event cameras, EvDehaze conditions a latent diffusion model with event-derived edge and illumination features. A newly collected real-world dataset with synchronized RGB-event data under heavy haze is also introduced. Our method achieves state-of-the-art performance across synthetic and real-world benchmarks.
           </p>
         </div>
       </div>
 
       <div class="row">
         <div class="col-md-8 col-md-offset-2">
-          <h3>System Overview</h3>
-          <img src="./image/0-CoverFigure.pdf" class="img-responsive" alt="overview">
+          <h3>Motivation and Overview</h3>
+          <img src="./images/0-CoverFigure.png" class="img-responsive" alt="overview">
         </div>
       </div>
 
       <div class="row">
         <div class="col-md-8 col-md-offset-2">
-          <h3>Architecture Details</h3>
-          <img src="./image/3-Methods.pdf" class="img-responsive" alt="architecture">
+          <h3>Method: EvDehaze Framework</h3>
+          <img src="./images/3-Methods.png" class="img-responsive" alt="architecture">
         </div>
       </div>
 
       <div class="row">
         <div class="col-md-8 col-md-offset-2">
-          <h3>Results</h3>
-          <p class="text-justify">Below are visual results comparing EvDehaze with other baselines:</p>
-          <img src="./image/8-Compare.pdf" class="img-responsive" alt="results">
-          <img src="./image/visual_compare.pdf" class="img-responsive" alt="visual comparison">
-          <img src="./image/sots_test1.pdf" class="img-responsive" alt="sots test 1">
-          <img src="./image/sots_test2.pdf" class="img-responsive" alt="sots test 2">
+          <h3>Event-Based Real-World Dataset</h3>
+          <img src="./images/1-RealDataset.png" class="img-responsive" alt="real dataset">
         </div>
       </div>
 
       <div class="row">
         <div class="col-md-8 col-md-offset-2">
-          <h3>Event Feature Visualization</h3>
-          <img src="./image/event_feature.pdf" class="img-responsive" alt="event features">
-          <img src="./image/event_visual.pdf" class="img-responsive" alt="event visualization">
+          <h3>Qualitative Comparison</h3>
+          <img src="./images/8-Compare.png" class="img-responsive" alt="compare">
+          <img src="./images/sots_test1.png" class="img-responsive" alt="sots1">
+          <img src="./images/sots_test2.png" class="img-responsive" alt="sots2">
         </div>
       </div>
 
       <div class="row">
         <div class="col-md-8 col-md-offset-2">
-          <h3>Real-world Evaluation</h3>
-          <img src="./image/11-Realworld-Evaluation.pdf" class="img-responsive" alt="real world eval">
-          <img src="./image/real_event.pdf" class="img-responsive" alt="real event">
-          <img src="./image/reside_event.pdf" class="img-responsive" alt="reside event">
+          <h3>Real Event Evaluation</h3>
+          <img src="./images/real_event.png" class="img-responsive" alt="real event">
+          <img src="./images/reside_event.png" class="img-responsive" alt="reside event">
         </div>
       </div>
     </div>
