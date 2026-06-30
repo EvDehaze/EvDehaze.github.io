@@ -2,94 +2,877 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8">
-    <meta http-equiv="x-ua-compatible" content="ie=edge">
-    <title>EvDehaze: Event-Guided Dehazing</title>
-    <meta name="author" content="anonymous">
-    <meta name="description" content="Project page of EvDehaze">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link rel="icon" type="image/png" href="">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
-    <link rel="stylesheet" href="../format/app.css">
-    <link rel="stylesheet" href="../format/bootstrap.min.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="author" content="Ling Wang, Yunfan Lu, Wenzong Ma, Huizai Yao, Pengteng Li, Hui Xiong">
+    <meta name="description" content="EvDehaze: event-guided diffusion framework for image dehazing.">
+    <title>EvDehaze | Event-Guided Diffusion for Dehazing</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #080906;
+        --bg-soft: #10130d;
+        --ink: #f3f1e7;
+        --muted: #b2b4aa;
+        --line: rgba(243, 241, 231, 0.16);
+        --line-strong: rgba(243, 241, 231, 0.28);
+        --amber: #e6b45a;
+        --signal: #62d4c8;
+        --red: #c25746;
+        --panel: rgba(19, 23, 17, 0.72);
+        --panel-soft: rgba(243, 241, 231, 0.06);
+        --shadow: 0 32px 90px rgba(0, 0, 0, 0.42);
+        --max: 1180px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        min-width: 320px;
+        background:
+          radial-gradient(circle at 16% 0%, rgba(98, 212, 200, 0.14), transparent 34rem),
+          radial-gradient(circle at 86% 14%, rgba(230, 180, 90, 0.13), transparent 32rem),
+          linear-gradient(180deg, #080906 0%, #11120c 48%, #080906 100%);
+        color: var(--ink);
+        font-family: "Avenir Next", "Segoe UI", system-ui, sans-serif;
+        letter-spacing: 0;
+      }
+
+      body::before {
+        position: fixed;
+        inset: 0;
+        z-index: -2;
+        content: "";
+        background-image:
+          linear-gradient(rgba(243, 241, 231, 0.045) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(243, 241, 231, 0.045) 1px, transparent 1px);
+        background-size: 72px 72px;
+        mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.82), transparent 88%);
+      }
+
+      body::after {
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+        pointer-events: none;
+        content: "";
+        background:
+          linear-gradient(90deg, rgba(8, 9, 6, 0.94), transparent 18%, transparent 82%, rgba(8, 9, 6, 0.94)),
+          repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.026) 0 1px, transparent 1px 5px);
+        opacity: 0.55;
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      img, video {
+        display: block;
+        max-width: 100%;
+      }
+
+      .shell {
+        width: min(100% - 40px, var(--max));
+        margin: 0 auto;
+      }
+
+      .topbar {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        border-bottom: 1px solid rgba(243, 241, 231, 0.1);
+        background: rgba(8, 9, 6, 0.78);
+        backdrop-filter: blur(22px);
+      }
+
+      .topbar .shell {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        min-height: 66px;
+        gap: 24px;
+      }
+
+      .mark {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 13px;
+        font-weight: 700;
+        text-transform: uppercase;
+      }
+
+      .mark::before {
+        width: 12px;
+        height: 12px;
+        content: "";
+        border: 1px solid var(--signal);
+        box-shadow: 0 0 20px rgba(98, 212, 200, 0.5);
+        transform: rotate(45deg);
+      }
+
+      nav {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      nav a {
+        padding: 8px 0;
+      }
+
+      nav a:hover {
+        color: var(--ink);
+      }
+
+      .hero {
+        min-height: calc(100svh - 66px);
+        padding: clamp(64px, 8vw, 108px) 0 42px;
+        display: grid;
+        align-items: end;
+      }
+
+      .hero-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 0.88fr) minmax(420px, 1.12fr);
+        gap: clamp(30px, 5vw, 68px);
+        align-items: center;
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        margin: 0 0 22px;
+        color: var(--amber);
+        font-size: 12px;
+        font-weight: 800;
+        text-transform: uppercase;
+      }
+
+      .eyebrow::before,
+      .eyebrow::after {
+        display: block;
+        width: 32px;
+        height: 1px;
+        content: "";
+        background: var(--amber);
+      }
+
+      h1 {
+        margin: 0;
+        font-family: Optima, "Iowan Old Style", Georgia, serif;
+        font-size: clamp(48px, 7.8vw, 112px);
+        font-weight: 500;
+        line-height: 0.92;
+        text-wrap: balance;
+      }
+
+      .subtitle {
+        max-width: 680px;
+        margin: 26px 0 0;
+        color: rgba(243, 241, 231, 0.78);
+        font-size: clamp(17px, 2vw, 22px);
+        line-height: 1.6;
+        text-wrap: pretty;
+      }
+
+      .authors {
+        margin: 28px 0 0;
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.8;
+      }
+
+      .authors a {
+        color: var(--ink);
+        border-bottom: 1px solid rgba(230, 180, 90, 0.45);
+      }
+
+      .cta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 34px;
+      }
+
+      .button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 44px;
+        padding: 0 18px;
+        border: 1px solid var(--line-strong);
+        background: rgba(243, 241, 231, 0.06);
+        color: var(--ink);
+        font-size: 13px;
+        font-weight: 750;
+        text-transform: uppercase;
+      }
+
+      .button.primary {
+        border-color: rgba(230, 180, 90, 0.75);
+        background: linear-gradient(135deg, rgba(230, 180, 90, 0.24), rgba(98, 212, 200, 0.11));
+        box-shadow: 0 18px 48px rgba(230, 180, 90, 0.12);
+      }
+
+      .button:hover {
+        border-color: var(--signal);
+        color: #fffdf4;
+      }
+
+      .hero-visual {
+        position: relative;
+        padding: clamp(12px, 1.8vw, 18px);
+        border: 1px solid var(--line);
+        background:
+          linear-gradient(135deg, rgba(98, 212, 200, 0.13), transparent 38%),
+          rgba(243, 241, 231, 0.055);
+        box-shadow: var(--shadow);
+      }
+
+      .hero-visual::before {
+        position: absolute;
+        inset: -1px;
+        content: "";
+        pointer-events: none;
+        border: 1px solid rgba(98, 212, 200, 0.28);
+        clip-path: polygon(0 0, 28% 0, 28% 2px, 2px 2px, 2px 32%, 0 32%);
+      }
+
+      .hero-visual img {
+        width: 100%;
+        border: 1px solid rgba(243, 241, 231, 0.12);
+        background: #111;
+      }
+
+      .visual-caption {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        margin-top: 14px;
+        color: var(--muted);
+        font-size: 12px;
+        text-transform: uppercase;
+      }
+
+      .ticker {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1px;
+        margin-top: 44px;
+        border: 1px solid var(--line);
+        background: var(--line);
+      }
+
+      .tick {
+        min-height: 112px;
+        padding: 22px;
+        background: rgba(8, 9, 6, 0.78);
+      }
+
+      .tick b {
+        display: block;
+        margin-bottom: 10px;
+        color: var(--signal);
+        font-size: 14px;
+        text-transform: uppercase;
+      }
+
+      .tick span {
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.5;
+      }
+
+      section {
+        padding: clamp(70px, 9vw, 120px) 0;
+        border-top: 1px solid rgba(243, 241, 231, 0.1);
+      }
+
+      .section-head {
+        display: grid;
+        grid-template-columns: 0.38fr 0.62fr;
+        gap: 42px;
+        align-items: start;
+        margin-bottom: 34px;
+      }
+
+      .kicker {
+        margin: 0;
+        color: var(--amber);
+        font-size: 12px;
+        font-weight: 850;
+        text-transform: uppercase;
+      }
+
+      h2 {
+        margin: 0;
+        font-family: Optima, "Iowan Old Style", Georgia, serif;
+        font-size: clamp(32px, 4.8vw, 62px);
+        font-weight: 500;
+        line-height: 1;
+        text-wrap: balance;
+      }
+
+      .section-copy {
+        margin: 18px 0 0;
+        color: rgba(243, 241, 231, 0.74);
+        font-size: 17px;
+        line-height: 1.75;
+        text-wrap: pretty;
+      }
+
+      .figure-frame {
+        border: 1px solid var(--line);
+        background: rgba(243, 241, 231, 0.05);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+      }
+
+      .figure-frame img,
+      .figure-frame video {
+        width: 100%;
+      }
+
+      .figure-frame.padded {
+        padding: clamp(12px, 2vw, 22px);
+      }
+
+      .split {
+        display: grid;
+        grid-template-columns: 0.95fr 1.05fr;
+        gap: 28px;
+        align-items: stretch;
+      }
+
+      .statement {
+        border: 1px solid var(--line);
+        background: var(--panel);
+        padding: clamp(24px, 3vw, 34px);
+      }
+
+      .statement h3 {
+        margin: 0 0 18px;
+        color: var(--ink);
+        font-size: 18px;
+        text-transform: uppercase;
+      }
+
+      .statement p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 15px;
+        line-height: 1.7;
+      }
+
+      .method-list {
+        display: grid;
+        gap: 1px;
+        margin: 22px 0 0;
+        background: var(--line);
+        border: 1px solid var(--line);
+      }
+
+      .method-item {
+        display: grid;
+        grid-template-columns: 72px 1fr;
+        gap: 20px;
+        padding: 22px;
+        background: rgba(8, 9, 6, 0.82);
+      }
+
+      .method-item .num {
+        color: var(--amber);
+        font-family: Optima, Georgia, serif;
+        font-size: 34px;
+      }
+
+      .method-item strong {
+        display: block;
+        margin-bottom: 8px;
+        color: var(--ink);
+      }
+
+      .method-item span {
+        color: var(--muted);
+        line-height: 1.6;
+      }
+
+      .metrics {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1px;
+        margin: 26px 0 0;
+        border: 1px solid var(--line);
+        background: var(--line);
+      }
+
+      .metric {
+        padding: 24px;
+        background: rgba(8, 9, 6, 0.82);
+      }
+
+      .metric .value {
+        color: var(--ink);
+        font-family: Optima, Georgia, serif;
+        font-size: clamp(34px, 4vw, 54px);
+        line-height: 1;
+      }
+
+      .metric .label {
+        margin-top: 8px;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.5;
+      }
+
+      .table-wrap {
+        overflow-x: auto;
+        border: 1px solid var(--line);
+        background: rgba(8, 9, 6, 0.76);
+      }
+
+      table {
+        width: 100%;
+        min-width: 760px;
+        border-collapse: collapse;
+        font-size: 13px;
+      }
+
+      th, td {
+        padding: 16px 18px;
+        border-bottom: 1px solid rgba(243, 241, 231, 0.1);
+        text-align: right;
+        white-space: nowrap;
+      }
+
+      th:first-child,
+      td:first-child {
+        text-align: left;
+      }
+
+      th {
+        color: var(--amber);
+        font-weight: 800;
+        text-transform: uppercase;
+      }
+
+      td {
+        color: var(--muted);
+      }
+
+      tr:last-child td {
+        border-bottom: 0;
+      }
+
+      tr.ev td {
+        color: var(--ink);
+        background: rgba(98, 212, 200, 0.07);
+      }
+
+      .video-grid {
+        display: grid;
+        grid-template-columns: 1.12fr 0.88fr;
+        gap: 28px;
+        align-items: start;
+      }
+
+      .download-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 20px;
+      }
+
+      pre {
+        margin: 0;
+        padding: 24px;
+        overflow-x: auto;
+        border: 1px solid var(--line);
+        background: rgba(0, 0, 0, 0.38);
+        color: rgba(243, 241, 231, 0.8);
+        font-family: "SFMono-Regular", Consolas, monospace;
+        font-size: 13px;
+        line-height: 1.65;
+      }
+
+      footer {
+        padding: 44px 0 64px;
+        border-top: 1px solid rgba(243, 241, 231, 0.1);
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.7;
+      }
+
+      @media (max-width: 980px) {
+        .hero-grid,
+        .section-head,
+        .split,
+        .video-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .hero {
+          min-height: auto;
+        }
+
+        .ticker,
+        .metrics {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+
+      @media (max-width: 680px) {
+        .shell {
+          width: min(100% - 28px, var(--max));
+        }
+
+        .topbar .shell {
+          align-items: flex-start;
+          flex-direction: column;
+          gap: 8px;
+          padding: 16px 0;
+        }
+
+        nav {
+          width: 100%;
+          gap: 12px;
+          overflow-x: auto;
+          padding-bottom: 4px;
+        }
+
+        .hero {
+          padding-top: 48px;
+        }
+
+        .ticker,
+        .metrics {
+          grid-template-columns: 1fr;
+        }
+
+        .tick,
+        .metric,
+        .statement,
+        .method-item {
+          padding: 18px;
+        }
+
+        .method-item {
+          grid-template-columns: 1fr;
+          gap: 6px;
+        }
+      }
+    </style>
   </head>
-
-  <body style="text-align: center;">
-    <div class="container" id="main">
-      <div class="row">
-        <h1 class="col-md-12 text-center">
-          EvDehaze: Dynamic Scene Dehazing via Event Camera
-        </h1>
+  <body>
+    <header class="topbar">
+      <div class="shell">
+        <a class="mark" href="#">EvDehaze</a>
+        <nav aria-label="Project navigation">
+          <a href="#method">Method</a>
+          <a href="#dataset">Dataset</a>
+          <a href="#results">Results</a>
+          <a href="#citation">Citation</a>
+        </nav>
       </div>
+    </header>
 
-      <div class="row">
-        <div class="col-md-8 col-md-offset-2 text-center">
-          <ul class="nav nav-pills nav-justified">
-            <li>
-              <a href="#">
-                <img src="./images/1-RealDataset.png" height="100px"><br>
-                <h4><strong>Dataset</strong></h4>
-              </a>
-            </li>
-            <li>
-              <a href="#">
-                <img src="./images/3-Methods.png" height="100px"><br>
-                <h4><strong>Code</strong></h4>
-              </a>
-            </li>
-          </ul>
+    <main>
+      <section class="hero" aria-labelledby="title">
+        <div class="shell">
+          <div class="hero-grid">
+            <div>
+              <p class="eyebrow">CVPR 2026</p>
+              <h1 id="title">From Events to Clarity</h1>
+              <p class="subtitle">
+                The event-guided diffusion framework for dehazing. EvDehaze uses high dynamic range event cues to recover structure, contrast, and temporal detail from hazy dynamic scenes.
+              </p>
+              <p class="authors">
+                <a href="https://daviswang0.github.io/">Ling Wang</a><sup>*</sup>,
+                <a href="https://yunfanlu.github.io/">Yunfan Lu</a><sup>*</sup>,
+                <a href="https://anthony-ecpkn.github.io/">Wenzong Ma</a>,
+                <a href="https://huizaivictoryao.github.io/">Huizai Yao</a>,
+                Pengteng Li,
+                <a href="https://ailab.hkust-gz.edu.cn/index.html">Hui Xiong</a><sup>&dagger;</sup><br>
+                The Hong Kong University of Science and Technology (Guangzhou)
+              </p>
+              <div class="cta" aria-label="Project links">
+                <a class="button primary" href="https://github.com/DavisWANG0/EvDehaze">Code</a>
+                <span class="button" aria-disabled="true">Dataset (Coming Soon)</span>
+                <a class="button" href="https://cvpr.thecvf.com/virtual/2026/poster/37331">CVPR Poster</a>
+                <a class="button" href="#citation">BibTeX</a>
+              </div>
+            </div>
+
+            <div class="hero-visual">
+              <img src="assets/figs/teaser.png" alt="EvDehaze teaser showing hazy RGB, event cues, and restored output">
+              <div class="visual-caption">
+                <span>RGB + Event</span>
+                <span>Diffusion Dehazing</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="ticker" aria-label="Project highlights">
+            <div class="tick">
+              <b>First</b>
+              <span>Event-guided diffusion formulation for image dehazing.</span>
+            </div>
+            <div class="tick">
+              <b>HDR Cues</b>
+              <span>Event streams preserve structure where frame contrast is suppressed.</span>
+            </div>
+            <div class="tick">
+              <b>Real Data</b>
+              <span>UAV RGB-event capture platform for real hazy outdoor scenes.</span>
+            </div>
+            <div class="tick">
+              <b>Strong Results</b>
+              <span>Best overall diffusion baseline on SOTS and NH-HAZE metrics.</span>
+            </div>
+          </div>
         </div>
-      </div>
+      </section>
 
-      <div class="row">
-        <div class="col-md-8 col-md-offset-2">
-          <h3>Abstract</h3>
-          <p class="text-justify">
-            Clear imaging under hazy conditions is a critical task. To address the limitations of traditional dehazing models based solely on RGB sensors, we propose <strong>EvDehaze</strong>, the first event-guided diffusion framework for image dehazing. Leveraging the high dynamic range and temporal precision of event cameras, EvDehaze conditions a latent diffusion model with event-derived edge and illumination features. A newly collected real-world dataset with synchronized RGB-event data under heavy haze is also introduced. Our method achieves state-of-the-art performance across synthetic and real-world benchmarks.
-          </p>
+      <section id="overview">
+        <div class="shell">
+          <div class="section-head">
+            <div>
+              <p class="kicker">Abstract</p>
+            </div>
+            <div>
+              <h2>Event cameras reveal the signal that haze hides from frames.</h2>
+              <p class="section-copy">
+                Conventional RGB dehazing struggles when scattering removes scene structures and illumination details. EvDehaze introduces event cameras into dehazing and treats restoration as event-conditioned generation, injecting event-derived edge and illumination features into a latent diffusion model.
+              </p>
+            </div>
+          </div>
+          <div class="split">
+            <div class="statement">
+              <h3>Why Events</h3>
+              <p>
+                Events offer high dynamic range sensing and microsecond temporal precision. Under dense haze, they provide sparse but reliable motion, edge, and contrast cues that complement low-contrast RGB frames.
+              </p>
+            </div>
+            <div class="statement">
+              <h3>What EvDehaze Adds</h3>
+              <p>
+                The framework aligns hazy RGB frames with temporal event representations, then guides DDIM denoising through cross-attention so the model can restore natural contrast and sharper structures.
+              </p>
+            </div>
+          </div>
         </div>
-      </div>
+      </section>
 
-      <div class="row">
-        <div class="col-md-8 col-md-offset-2">
-          <h3>Motivation and Overview</h3>
-          <img src="./images/0-CoverFigure.png" class="img-responsive" alt="overview">
+      <section id="method">
+        <div class="shell">
+          <div class="section-head">
+            <div>
+              <p class="kicker">Method</p>
+            </div>
+            <div>
+              <h2>RGB restoration steered by event-conditioned diffusion.</h2>
+              <p class="section-copy">
+                EvDehaze keeps the image-generation strength of latent diffusion while adding event guidance at the feature level.
+              </p>
+            </div>
+          </div>
+          <div class="figure-frame padded">
+            <img src="assets/figs/method.png" alt="EvDehaze method diagram">
+          </div>
+          <div class="method-list">
+            <div class="method-item">
+              <div class="num">01</div>
+              <div>
+                <strong>Latent DDIM Backbone</strong>
+                <span>A hazy RGB frame is encoded, iteratively refined in latent space, and decoded into the restored image.</span>
+              </div>
+            </div>
+            <div class="method-item">
+              <div class="num">02</div>
+              <div>
+                <strong>Temporal Event Representation</strong>
+                <span>Raw events are converted into pyramid features that capture edge, corner, and illumination changes across time.</span>
+              </div>
+            </div>
+            <div class="method-item">
+              <div class="num">03</div>
+              <div>
+                <strong>Cross-Attention Guidance</strong>
+                <span>Event features condition intermediate U-Net features through diffusion sampling, improving structure recovery in degraded regions.</span>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
+      </section>
 
-      <div class="row">
-        <div class="col-md-8 col-md-offset-2">
-          <h3>Method: EvDehaze Framework</h3>
-          <img src="./images/3-Methods.png" class="img-responsive" alt="architecture">
+      <section id="dataset">
+        <div class="shell">
+          <div class="section-head">
+            <div>
+              <p class="kicker">Dataset</p>
+            </div>
+            <div>
+              <h2>Real RGB-event haze captures from an airborne platform.</h2>
+              <p class="section-copy">
+                The dataset uses synchronized RGB and event sensors mounted on a UAV to record outdoor scenes under heavy haze. Synthetic RGB-event data is also generated from RESIDE/SOTS for supervised training and evaluation.
+              </p>
+              <div class="download-row">
+                <span class="button primary" aria-disabled="true">Dataset (Coming Soon)</span>
+              </div>
+            </div>
+          </div>
+          <div class="figure-frame padded">
+            <img src="assets/figs/real_dataset.png" alt="Real-world RGB-event haze dataset collection platform and examples">
+          </div>
+          <div class="metrics">
+            <div class="metric">
+              <div class="value">6,674</div>
+              <div class="label">Real-world event segments reported in supplementary material.</div>
+            </div>
+            <div class="metric">
+              <div class="value">61,173</div>
+              <div class="label">Aligned hazy RGB images for real RGB-event evaluation.</div>
+            </div>
+            <div class="metric">
+              <div class="value">3</div>
+              <div class="label">Synthetic motion types: radial, rotational, and translational.</div>
+            </div>
+          </div>
         </div>
-      </div>
+      </section>
 
-      <div class="row">
-        <div class="col-md-8 col-md-offset-2">
-          <h3>Event-Based Real-World Dataset</h3>
-          <img src="./images/1-RealDataset.png" class="img-responsive" alt="real dataset">
-        </div>
-      </div>
+      <section id="results">
+        <div class="shell">
+          <div class="section-head">
+            <div>
+              <p class="kicker">Results</p>
+            </div>
+            <div>
+              <h2>Sharper structures and stronger real-world contrast.</h2>
+              <p class="section-copy">
+                Qualitative panels show hazy input, event visualization, EvDehaze output, and histogram comparisons on real UAV captures.
+              </p>
+            </div>
+          </div>
+          <div class="video-grid">
+            <div class="figure-frame">
+              <img src="assets/videos/realworld_panel_preview.gif" alt="Animated real-world EvDehaze qualitative results">
+            </div>
+            <div>
+              <div class="statement">
+                <h3>Real-World Visualization</h3>
+                <p>
+                  Event cues emphasize scene boundaries and illumination changes that are weak in RGB-only observations, helping the diffusion sampler recover cleaner perceptual structure.
+                </p>
+                <div class="download-row">
+                  <a class="button primary" href="assets/videos/realworld_panel.mp4">Download MP4</a>
+                  <a class="button" href="assets/figs/realworld_evaluation.png">Open Figure</a>
+                </div>
+              </div>
+            </div>
+          </div>
 
-      <div class="row">
-        <div class="col-md-8 col-md-offset-2">
-          <h3>Qualitative Comparison</h3>
-          <img src="./images/8-Compare.png" class="img-responsive" alt="compare">
-          <img src="./images/sots_test1.png" class="img-responsive" alt="sots1">
-          <img src="./images/sots_test2.png" class="img-responsive" alt="sots2">
-        </div>
-      </div>
+          <div style="height: 38px"></div>
+          <div class="figure-frame padded">
+            <img src="assets/figs/realworld_evaluation.png" alt="EvDehaze real-world qualitative evaluation">
+          </div>
 
-      <div class="row">
-        <div class="col-md-8 col-md-offset-2">
-          <h3>Real Event Evaluation</h3>
-          <img src="./images/real_event.png" class="img-responsive" alt="real event">
-          <h3>Simulated Event from RESIDE</h3>
-          <img src="./images/reside_event.png" class="img-responsive" alt="reside event">
+          <div style="height: 38px"></div>
+          <div class="table-wrap" aria-label="Quantitative comparison table">
+            <table>
+              <thead>
+                <tr>
+                  <th>Method</th>
+                  <th>Diffusion</th>
+                  <th>SOTS PSNR</th>
+                  <th>SOTS SSIM</th>
+                  <th>SOTS LPIPS</th>
+                  <th>NH-HAZE PSNR</th>
+                  <th>NH-HAZE SSIM</th>
+                  <th>NH-HAZE LPIPS</th>
+                  <th>Params</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>IR-SDE</td>
+                  <td>Yes</td>
+                  <td>33.82</td>
+                  <td>0.984</td>
+                  <td>0.014</td>
+                  <td>12.59</td>
+                  <td>0.520</td>
+                  <td>0.361</td>
+                  <td>537.21M</td>
+                </tr>
+                <tr>
+                  <td>ResShift</td>
+                  <td>Yes</td>
+                  <td>29.06</td>
+                  <td>0.950</td>
+                  <td>0.017</td>
+                  <td>16.26</td>
+                  <td>0.625</td>
+                  <td>0.327</td>
+                  <td>114.65M</td>
+                </tr>
+                <tr class="ev">
+                  <td><strong>EvDehaze</strong></td>
+                  <td><strong>Yes</strong></td>
+                  <td><strong>34.12</strong></td>
+                  <td><strong>0.986</strong></td>
+                  <td><strong>0.012</strong></td>
+                  <td><strong>18.43</strong></td>
+                  <td><strong>0.637</strong></td>
+                  <td><strong>0.313</strong></td>
+                  <td><strong>122.68M</strong></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
+      </section>
+
+      <section id="citation">
+        <div class="shell">
+          <div class="section-head">
+            <div>
+              <p class="kicker">Citation</p>
+            </div>
+            <div>
+              <h2>Reference</h2>
+              <p class="section-copy">
+                Please cite EvDehaze if this project is useful for your research.
+              </p>
+            </div>
+          </div>
+          <pre><code>@inproceedings{wang2026events,
+  title={From Events to Clarity: The Event-Guided Diffusion Framework for Dehazing},
+  author={Wang, Ling and Lu, Yunfan and Ma, Wenzong and Yao, Huizai and Li, Pengteng and Xiong, Hui},
+  booktitle={Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition},
+  pages={34028--34039},
+  month={June},
+  year={2026}
+}</code></pre>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="shell">
+        <p>Project page for EvDehaze. Code and release materials are maintained in the official repository.</p>
       </div>
-    </div>
+    </footer>
   </body>
 </html>
